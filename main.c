@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(const int argc, char *argv[]) {
     // UTF-8 지원 (Windows)
@@ -14,19 +15,20 @@ int main(const int argc, char *argv[]) {
         return -1;
     }
 
-    // 입력한 인자가 숫자인지 확인
-    for (int i = 0; argv[1][i] != '\0'; i++) {
-        if (argv[1][i] < '0' || argv[1][i] > '9') {
-            printf("Error: %s is not a number.\n", argv[1]);
-            printf("-----\n");
-            printf("Usage: %s <celsius> <language>\n", argv[0]);
-            printf("Supported languages: ENUS, KOKR, JAJP, ZHCN");
-            return -1;
-        }
+    // 입력한 인자에 오버플로우가 있는지 확인후 오류가 있는지 확인
+    char* temp;
+    errno = 0;
+    const long argInt = strtol(argv[1], &temp, 10);
+    if (*temp != '\0' || errno != 0) {
+        printf("Error: %s is not a number or out of range.\n", argv[1]);
+        printf("-----\n");
+        printf("Usage: %s <celsius> <language>\n", argv[0]);
+        printf("Supported languages: ENUS, KOKR, JAJP, ZHCN");
+        return -1;
     }
 
     // 섭씨를 화씨로 변환
-    const int celsius = atoi(argv[1]);
+    const int celsius = argInt;
     const float fahrenheit = celsius * (9 / 5) + 32;
     const int asciiToHex = (int) argv[2][0] + (int) argv[2][1] + (int) argv[2][2] + (int) argv[2][3];
 
